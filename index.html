@@ -1,70 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Business Catalog</title>
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#111111" />
+  <link rel="icon" href="./icons/icon-192.png" />
   <style>
-    body { font-family: Arial, sans-serif; background:#fff; margin:0; padding:0; }
-    header { text-align: center; background:#000; color:#fff; padding:20px; position:relative; }
-    #banner { width:100%; height:200px; object-fit:cover; background:#222; }
-    #logo { width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid #111; margin-top:-40px; background:#fff; }
-    h1 { margin:10px 0; }
-    #shop-description { font-style: italic; color:#ddd; }
-    main { padding:20px; }
-    .product { display:flex; align-items:center; justify-content:space-between; padding:8px; border-bottom:1px solid #ddd; }
-    .product span { flex:1; cursor:pointer; }
-    button { margin-left:10px; padding:5px 10px; border:none; cursor:pointer; background:#111; color:#fff; border-radius:4px; }
-    button.delete { background:#d33; }
-    form { margin:20px 0; display:flex; gap:10px; flex-wrap:wrap; }
-    input { padding:5px; flex:1; }
-    .editor-box { margin-top:20px; padding:10px; border:1px solid #ddd; border-radius:6px; }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
+    header { text-align: center; padding: 15px; background: #111; color: #fff; }
+    #banner { width: 100%; max-height: 200px; object-fit: cover; }
+    #logo { width: 80px; height: 80px; border-radius: 50%; margin-top: -40px; border: 3px solid #fff; }
+    #business-name { font-size: 22px; font-weight: bold; margin: 10px 0; }
+    #shop-description { font-size: 14px; color: #444; margin-bottom: 20px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:15px; padding:15px; }
+    .card { background:#fff; padding:10px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1); text-align:center; }
+    .price { font-size:18px; font-weight:bold; color:#333; }
+    .discount { color:green; font-size:14px; }
+    .editor-box { padding:15px; background:#fff; margin:15px; border-radius:10px; }
+    input, select, button { padding:8px; margin:5px 0; width:100%; }
+    button { background:#111; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+    button.delete { background:red; }
   </style>
 </head>
 <body>
-
-  <!-- Header Section -->
   <header>
-    <img id="banner" src="" alt="Business Banner">
-    <input type="file" id="banner-upload" accept="image/*">
-    <br>
-    <img id="logo" src="" alt="Business Logo">
-    <input type="file" id="logo-upload" accept="image/*">
-    <h1 id="business-name" contenteditable="true">Business Catalog</h1>
-    <p id="shop-description" contenteditable="true">Showcase your products easily</p>
+    <img id="banner" src="" alt="Banner"/>
+    <img id="logo" src="" alt="Logo"/>
+    <div id="business-name" contenteditable="true">My Business</div>
+    <div id="shop-description" contenteditable="true">Best products at the best prices</div>
   </header>
 
-  <!-- Example Storefront -->
-  <main>
-    <h2>Products</h2>
+  <!-- Currency Selector -->
+  <div style="text-align:center; margin:10px;">
+    <label for="currencySelect">Currency:</label>
+    <select id="currencySelect" onchange="updateCurrency()">
+      <option value="$">$</option>
+      <option value="₦">₦</option>
+      <option value="€">€</option>
+      <option value="£">£</option>
+      <option value="₹">₹</option>
+    </select>
+  </div>
 
-    <!-- WhatsApp number editor -->
-    <div class="editor-box">
-      <label for="whatsappInput">Seller WhatsApp Number:</label>
-      <input type="text" id="whatsappInput" placeholder="e.g. 2348012345678">
-      <button onclick="saveWhatsApp()">Save</button>
-    </div>
+  <!-- WhatsApp -->
+  <div style="text-align:center; margin:10px;">
+    <input type="text" id="whatsappInput" placeholder="Enter WhatsApp Number" />
+    <button onclick="saveWhatsApp()">Save WhatsApp</button>
+  </div>
 
-    <!-- Product form -->
-    <form id="add-product-form">
-      <input type="text" id="product-name" placeholder="Product Name" required>
-      <input type="text" id="product-price" placeholder="Price (e.g. $50)" required>
-      <button type="submit">Add</button>
-    </form>
-    <ul id="product-list"></ul>
-  </main>
+  <!-- Seller Login -->
+  <div style="text-align:center; margin:10px;">
+    <input type="password" id="sellerPassword" placeholder="Seller Login Password" />
+    <button onclick="checkLogin()">Login</button>
+  </div>
+
+  <!-- Seller Editor -->
+  <div id="editorPanel" class="editor-box" style="display:none;">
+    <h3>Seller Editor</h3>
+    <input type="text" id="product-name" placeholder="Product Name" required>
+    <input type="text" id="product-price" placeholder="Price" required>
+    <input type="text" id="product-discount" placeholder="Discount (optional)">
+    <input type="file" id="newImgFile" accept="image/*" onchange="previewUpload(event)">
+    <img id="uploadPreview" style="max-width:100%;margin-top:10px;display:none;"/>
+    <button onclick="addProduct()">Add Product</button>
+    <h4>Upload Banner</h4>
+    <input type="file" id="banner-upload" accept="image/*">
+    <h4>Upload Logo</h4>
+    <input type="file" id="logo-upload" accept="image/*">
+  </div>
+
+  <!-- Product List -->
+  <div id="product-list" class="grid"></div>
 
   <script>
     let whatsappNumber = localStorage.getItem("whatsappNumber") || "2348012345678";
+    let currentCurrency = localStorage.getItem("currency") || "$";
+    let loggedIn = false;
 
-    // Load saved data from localStorage
+    let defaultProducts = [
+      {name: "Red Shoes", price: 40, discount: "20% off", img: "https://i.ibb.co/0VW7F32P/freepik-edit-Candid-image-photog-1.png"},
+      {name: "Blue Dress", price: 55, discount: "10% off", img: "https://i.ibb.co/1f2Yxd6C/Leonardo-Phoenix-A-lovely-longsl.png"},
+      {name: "Handbag", price: 30, discount: "", img: "https://i.ibb.co/zVTStV9n/freepik-edit-Candid-image-photog-1.png"}
+    ];
+
     window.onload = () => {
       const savedBanner = localStorage.getItem("banner");
       const savedLogo = localStorage.getItem("logo");
       const savedName = localStorage.getItem("businessName");
       const savedDesc = localStorage.getItem("shopDesc");
-      const savedProducts = JSON.parse(localStorage.getItem("products") || "[]");
+      const savedProducts = JSON.parse(localStorage.getItem("products") || "null");
 
       if (savedBanner) document.getElementById("banner").src = savedBanner;
       if (savedLogo) document.getElementById("logo").src = savedLogo;
@@ -72,10 +98,10 @@
       if (savedDesc) document.getElementById("shop-description").innerText = savedDesc;
       if (whatsappNumber) document.getElementById("whatsappInput").value = whatsappNumber;
 
-      renderProducts(savedProducts);
+      renderProducts(savedProducts || defaultProducts);
+      document.getElementById("currencySelect").value = currentCurrency;
     };
 
-    // Save WhatsApp
     function saveWhatsApp() {
       const num = document.getElementById("whatsappInput").value.trim();
       if(num) {
@@ -85,7 +111,32 @@
       }
     }
 
-    // Save banner
+    function updateCurrency() {
+      currentCurrency = document.getElementById("currencySelect").value;
+      localStorage.setItem("currency", currentCurrency);
+      const products = JSON.parse(localStorage.getItem("products") || "[]") || defaultProducts;
+      renderProducts(products);
+    }
+
+    function checkLogin() {
+      const pass = document.getElementById("sellerPassword").value;
+      if (pass === "1234") {
+        loggedIn = true;
+        document.getElementById("editorPanel").style.display = "block";
+        alert("Seller editor unlocked!");
+      } else {
+        alert("Wrong password!");
+      }
+    }
+
+    document.getElementById("business-name").addEventListener("input", (e) => {
+      localStorage.setItem("businessName", e.target.innerText);
+    });
+
+    document.getElementById("shop-description").addEventListener("input", (e) => {
+      localStorage.setItem("shopDesc", e.target.innerText);
+    });
+
     document.getElementById("banner-upload").addEventListener("change", (e) => {
       const file = e.target.files[0];
       if (file) {
@@ -98,7 +149,6 @@
       }
     });
 
-    // Save logo
     document.getElementById("logo-upload").addEventListener("change", (e) => {
       const file = e.target.files[0];
       if (file) {
@@ -111,46 +161,60 @@
       }
     });
 
-    // Save business name
-    document.getElementById("business-name").addEventListener("input", (e) => {
-      localStorage.setItem("businessName", e.target.innerText);
-    });
+    let uploadedImage = "";
+    function previewUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          uploadedImage = e.target.result;
+          document.getElementById("uploadPreview").src = uploadedImage;
+          document.getElementById("uploadPreview").style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      }
+    }
 
-    // Save description
-    document.getElementById("shop-description").addEventListener("input", (e) => {
-      localStorage.setItem("shopDesc", e.target.innerText);
-    });
-
-    // Add product
-    document.getElementById("add-product-form").addEventListener("submit", (e) => {
-      e.preventDefault();
+    function addProduct() {
       const name = document.getElementById("product-name").value.trim();
       const price = document.getElementById("product-price").value.trim();
-      if (name && price) {
+      const discount = document.getElementById("product-discount").value.trim();
+
+      if (name && price && uploadedImage) {
         const products = JSON.parse(localStorage.getItem("products") || "[]");
-        products.push({ name, price });
+        products.push({ name, price, discount, img: uploadedImage });
         localStorage.setItem("products", JSON.stringify(products));
         renderProducts(products);
-        e.target.reset();
-      }
-    });
 
-    // Render products
+        document.getElementById("product-name").value = "";
+        document.getElementById("product-price").value = "";
+        document.getElementById("product-discount").value = "";
+        document.getElementById("newImgFile").value = "";
+        document.getElementById("uploadPreview").style.display = "none";
+        uploadedImage = "";
+      } else {
+        alert("Please enter name, price and upload an image.");
+      }
+    }
+
     function renderProducts(products) {
       const list = document.getElementById("product-list");
       list.innerHTML = "";
       products.forEach((p, index) => {
-        const li = document.createElement("li");
-        li.className = "product";
-        li.innerHTML = `
-          <span onclick="sendToWhatsApp('${p.name}')">${p.name} - ${p.price}</span>
-          <button class="delete" onclick="deleteProduct(${index})">Delete</button>
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <img src="${p.img}" alt="${p.name}" style="width:100%;height:150px;object-fit:cover;border-radius:6px;"/>
+          <h3>${p.name}</h3>
+          <p class="price">${currentCurrency}${p.price}</p>
+          <p class="discount">${p.discount || ""}</p>
+          <button onclick="sendToWhatsApp('${p.name}')">Order via WhatsApp</button>
+          ${loggedIn ? `<button class="delete" onclick="deleteProduct(${index})">Delete</button>` : ""}
         `;
-        list.appendChild(li);
+        list.appendChild(card);
       });
     }
 
-    // Delete product
     function deleteProduct(index) {
       let products = JSON.parse(localStorage.getItem("products") || "[]");
       products.splice(index, 1);
@@ -158,12 +222,19 @@
       renderProducts(products);
     }
 
-    // WhatsApp order
     function sendToWhatsApp(productName) {
       const msg = encodeURIComponent(`Hello, I'm interested in ${productName}`);
       window.open(`https://wa.me/${whatsappNumber}?text=${msg}`, "_blank");
     }
-  </script>
 
+    // Register Service Worker
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js")
+          .then(reg => console.log("Service Worker registered:", reg))
+          .catch(err => console.log("SW registration failed:", err));
+      });
+    }
+  </script>
 </body>
 </html>
