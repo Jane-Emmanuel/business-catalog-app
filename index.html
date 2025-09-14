@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Business Catalog</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f9f9f9; }
+    header { background: #111; color: white; padding: 15px; text-align: center; }
+    h1 { margin: 0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; padding: 15px; }
+    .card { background: white; padding: 10px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); text-align: center; }
+    .card img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; }
+    .price { font-size: 18px; font-weight: bold; color: #333; }
+    .discount { color: green; font-size: 14px; }
+    button { margin-top: 8px; padding: 8px 12px; border: none; border-radius: 6px; background: #25d366; color: white; cursor: pointer; }
+    button:hover { background: #1da851; }
+    footer { background: #111; color: white; padding: 10px; text-align: center; margin-top: 20px; }
+    .editor { background: #fff; padding: 15px; margin: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    input, select { padding: 8px; margin: 5px 0; width: 100%; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1 id="shopName">Business Catalog</h1>
+    <p id="shopDesc">Showcase your products easily</p>
+    <div>
+      <label for="currencySelect">Currency:</label>
+      <select id="currencySelect" onchange="updateCurrency()">
+        <option value="$">$</option>
+        <option value="₦">₦</option>
+        <option value="€">€</option>
+        <option value="£">£</option>
+        <option value="₹">₹</option>
+      </select>
+    </div>
+  </header>
+
+  <div style="padding:10px; text-align:center;">
+    <input type="password" id="sellerPassword" placeholder="Seller Login Password" />
+    <button onclick="checkLogin()">Login</button>
+  </div>
+
+  <div id="editorPanel" class="editor" style="display:none;">
+    <h3>Seller Editor</h3>
+    <input type="text" id="newName" placeholder="Product Name"/>
+    <input type="number" id="newPrice" placeholder="Product Price"/>
+    <input type="text" id="newDiscount" placeholder="Discount (optional)"/>
+    <input type="text" id="newImg" placeholder="Image URL"/>
+    <button onclick="addProduct()">Add Product</button>
+  </div>
+
+  <div class="grid" id="productGrid"></div>
+
+  <footer>
+    <p>© <span id="shopNameFooter">Business Catalog</span> | Powered by PWA</p>
+  </footer>
+
+  <script>
+    let currentCurrency = "$"; // default
+    const whatsappNumber = "2348012345678"; // seller's WhatsApp number
+    let loggedIn = false;
+
+    // Example Products (numeric price only)
+    let products = [
+      {name: "Red Shoes", price: 40, discount: "20% off", img: "https://i.ibb.co/0VW7F32P/freepik-edit-Candid-image-photog-1.png"},
+      {name: "Blue Dress", price: 55, discount: "10% off", img: "https://i.ibb.co/1f2Yxd6C/Leonardo-Phoenix-A-lovely-longsl.png"},
+      {name: "Handbag", price: 30, discount: "", img: "https://i.ibb.co/zVTStV9n/freepik-edit-Candid-image-photog-1.png"}
+    ];
+
+    function updateCurrency() {
+      currentCurrency = document.getElementById("currencySelect").value;
+      renderProducts();
+    }
+
+    function renderProducts() {
+      const grid = document.getElementById("productGrid");
+      grid.innerHTML = "";
+      products.forEach((p, i) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <img src="${p.img}" alt="${p.name}" />
+          <h3>${p.name}</h3>
+          <p class="price">${currentCurrency}${p.price}</p>
+          <p class="discount">${p.discount}</p>
+          <button onclick="sendToWhatsApp('${p.name}')">Order via WhatsApp</button>
+          ${loggedIn ? `<button onclick="deleteProduct(${i})" style="background:#e11d48;margin-top:5px;">Delete</button>` : ""}
+          <p style="font-size:12px;color:#888;">📸 Screenshot product & send to seller</p>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function sendToWhatsApp(productName) {
+      const url = `https://wa.me/${whatsappNumber}?text=Hello,%20I%20am%20interested%20in%20${encodeURIComponent(productName)}`;
+      window.open(url, "_blank");
+    }
+
+    function checkLogin() {
+      const pass = document.getElementById("sellerPassword").value;
+      if (pass === "1234") {
+        loggedIn = true;
+        document.getElementById("editorPanel").style.display = "block";
+        renderProducts();
+      } else {
+        alert("Wrong password!");
+      }
+    }
+
+    function addProduct() {
+      const name = document.getElementById("newName").value;
+      const price = document.getElementById("newPrice").value;
+      const discount = document.getElementById("newDiscount").value;
+      const img = document.getElementById("newImg").value;
+      if(name && price && img) {
+        products.push({name, price: parseFloat(price), discount, img});
+        renderProducts();
+        document.getElementById("newName").value = "";
+        document.getElementById("newPrice").value = "";
+        document.getElementById("newDiscount").value = "";
+        document.getElementById("newImg").value = "";
+      } else {
+        alert("Please fill at least name, price and image.");
+      }
+    }
+
+    function deleteProduct(i) {
+      products.splice(i, 1);
+      renderProducts();
+    }
+
+    renderProducts();
+  </script>
+
+</body>
+</html>
