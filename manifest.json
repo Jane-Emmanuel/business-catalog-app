@@ -1,8 +1,11 @@
 {
   "name": "Business Catalog",
   "short_name": "Catalog",
-  "start_url": ".",
+  "description": "A simple business catalog app where sellers can showcase products and customers can order via WhatsApp.",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#111111",
   "icons": [
