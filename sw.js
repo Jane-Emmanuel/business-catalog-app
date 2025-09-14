@@ -1,4 +1,5 @@
-const CACHE_NAME = "business-catalog-v3";
+const CACHE_NAME = "business-catalog-v4";
+
 const urlsToCache = [
   "./",
   "./index.html",
@@ -7,16 +8,17 @@ const urlsToCache = [
   "./icons/icon-512.png"
 ];
 
-// Install
+// Install Service Worker
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(urlsToCache);
     })
   );
+  self.skipWaiting(); // activate worker immediately
 });
 
-// Activate
+// Activate Service Worker
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) =>
@@ -29,13 +31,23 @@ self.addEventListener("activate", (event) => {
       )
     )
   );
+  self.clients.claim(); // take control of clients right away
 });
 
-// Fetch
+// Fetch Requests
 self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
+      // Serve from cache if available, otherwise fetch from network
+      return (
+        response ||
+        fetch(event.request).catch(() => {
+          // Offline fallback: show index.html
+          if (event.request.mode === "navigate") {
+            return caches.match("./index.html");
+          }
+        })
+      );
     })
   );
 });
