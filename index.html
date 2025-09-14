@@ -47,7 +47,11 @@
     <input type="text" id="newName" placeholder="Product Name"/>
     <input type="number" id="newPrice" placeholder="Product Price"/>
     <input type="text" id="newDiscount" placeholder="Discount (optional)"/>
-    <input type="text" id="newImg" placeholder="Image URL"/>
+    
+    <!-- Upload instead of URL -->
+    <input type="file" id="newImgFile" accept="image/*" onchange="previewUpload(event)"/>
+    <img id="uploadPreview" style="max-width:100%; margin-top:10px; display:none;"/>
+
     <button onclick="addProduct()">Add Product</button>
   </div>
 
@@ -61,8 +65,9 @@
     let currentCurrency = "$"; // default
     const whatsappNumber = "2348012345678"; // seller's WhatsApp number
     let loggedIn = false;
+    let uploadedImage = "";
 
-    // Example Products (numeric price only)
+    // Example Products
     let products = [
       {name: "Red Shoes", price: 40, discount: "20% off", img: "https://i.ibb.co/0VW7F32P/freepik-edit-Candid-image-photog-1.png"},
       {name: "Blue Dress", price: 55, discount: "10% off", img: "https://i.ibb.co/1f2Yxd6C/Leonardo-Phoenix-A-lovely-longsl.png"},
@@ -109,20 +114,37 @@
       }
     }
 
+    function previewUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          uploadedImage = e.target.result;
+          const img = document.getElementById("uploadPreview");
+          img.src = uploadedImage;
+          img.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
     function addProduct() {
       const name = document.getElementById("newName").value;
       const price = document.getElementById("newPrice").value;
       const discount = document.getElementById("newDiscount").value;
-      const img = document.getElementById("newImg").value;
-      if(name && price && img) {
-        products.push({name, price: parseFloat(price), discount, img});
+
+      if(name && price && uploadedImage) {
+        products.push({name, price: parseFloat(price), discount, img: uploadedImage});
         renderProducts();
+        // reset
         document.getElementById("newName").value = "";
         document.getElementById("newPrice").value = "";
         document.getElementById("newDiscount").value = "";
-        document.getElementById("newImg").value = "";
+        document.getElementById("newImgFile").value = "";
+        document.getElementById("uploadPreview").style.display = "none";
+        uploadedImage = "";
       } else {
-        alert("Please fill at least name, price and image.");
+        alert("Please fill at least name, price and upload an image.");
       }
     }
 
