@@ -1,7 +1,5 @@
-// sw.js - Business Catalog PWA
-
-const CACHE_NAME = "business-catalog-v2";
-const ASSETS_TO_CACHE = [
+const CACHE_NAME = "business-catalog-v3";
+const urlsToCache = [
   "./",
   "./index.html",
   "./manifest.json",
@@ -9,28 +7,31 @@ const ASSETS_TO_CACHE = [
   "./icons/icon-512.png"
 ];
 
-// Install event: cache app shell
+// Install
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+      return cache.addAll(urlsToCache);
     })
   );
 });
 
-// Activate event: cleanup old caches
+// Activate
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME)
-            .map((key) => caches.delete(key))
-      );
-    })
+    caches.keys().then((cacheNames) =>
+      Promise.all(
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            return caches.delete(cache);
+          }
+        })
+      )
+    )
   );
 });
 
-// Fetch event: serve from cache first, then network
+// Fetch
 self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
