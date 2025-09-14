@@ -13,7 +13,7 @@
     #banner { width: 100%; max-height: 200px; object-fit: cover; }
     #logo { width: 80px; height: 80px; border-radius: 50%; margin-top: -40px; border: 3px solid #fff; }
     #business-name { font-size: 22px; font-weight: bold; margin: 10px 0; }
-    #shop-description { font-size: 14px; color: #444; margin-bottom: 20px; }
+    #shop-description { font-size: 14px; color: #ddd; margin-bottom: 20px; }
     .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:15px; padding:15px; }
     .card { background:#fff; padding:10px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1); text-align:center; }
     .price { font-size:18px; font-weight:bold; color:#333; }
@@ -28,8 +28,8 @@
   <header>
     <img id="banner" src="" alt="Banner"/>
     <img id="logo" src="" alt="Logo"/>
-    <div id="business-name" contenteditable="true">My Business</div>
-    <div id="shop-description" contenteditable="true">Best products at the best prices</div>
+    <div id="business-name" contenteditable="false">My Business</div>
+    <div id="shop-description" contenteditable="false">Best products at the best prices</div>
   </header>
 
   <!-- Currency Selector -->
@@ -50,8 +50,8 @@
     <button onclick="saveWhatsApp()">Save WhatsApp</button>
   </div>
 
-  <!-- Seller Login -->
-  <div style="text-align:center; margin:10px;">
+  <!-- Hidden Seller Login -->
+  <div id="sellerLogin" style="display:none; text-align:center; margin:10px;">
     <input type="password" id="sellerPassword" placeholder="Seller Login Password" />
     <button onclick="checkLogin()">Login</button>
   </div>
@@ -100,6 +100,11 @@
 
       renderProducts(savedProducts || defaultProducts);
       document.getElementById("currencySelect").value = currentCurrency;
+
+      // Only show login if seller opens it manually
+      if (window.location.hash === "#seller") {
+        document.getElementById("sellerLogin").style.display = "block";
+      }
     };
 
     function saveWhatsApp() {
@@ -123,6 +128,8 @@
       if (pass === "1234") {
         loggedIn = true;
         document.getElementById("editorPanel").style.display = "block";
+        document.getElementById("business-name").setAttribute("contenteditable", "true");
+        document.getElementById("shop-description").setAttribute("contenteditable", "true");
         alert("Seller editor unlocked!");
       } else {
         alert("Wrong password!");
@@ -130,18 +137,18 @@
     }
 
     document.getElementById("business-name").addEventListener("input", (e) => {
-      localStorage.setItem("businessName", e.target.innerText);
+      if (loggedIn) localStorage.setItem("businessName", e.target.innerText);
     });
 
     document.getElementById("shop-description").addEventListener("input", (e) => {
-      localStorage.setItem("shopDesc", e.target.innerText);
+      if (loggedIn) localStorage.setItem("shopDesc", e.target.innerText);
     });
 
     document.getElementById("banner-upload").addEventListener("change", (e) => {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = function(evt) {
+        reader.onload = (evt) => {
           document.getElementById("banner").src = evt.target.result;
           localStorage.setItem("banner", evt.target.result);
         };
@@ -153,7 +160,7 @@
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = function(evt) {
+        reader.onload = (evt) => {
           document.getElementById("logo").src = evt.target.result;
           localStorage.setItem("logo", evt.target.result);
         };
@@ -227,7 +234,6 @@
       window.open(`https://wa.me/${whatsappNumber}?text=${msg}`, "_blank");
     }
 
-    // Register Service Worker
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
         navigator.serviceWorker.register("./sw.js")
